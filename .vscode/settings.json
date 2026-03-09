@@ -1,0 +1,31 @@
+{
+  // PHP 設定
+  "php.validate.executablePath": "/usr/local/bin/php",
+  "intelephense.environment.phpVersion": "8.3.0",
+
+  // 編輯器設定
+  "editor.formatOnSave": true,
+  "editor.tabSize": 4,
+
+  // PHP 檔案格式化
+  "[php]": {
+    "editor.defaultFormatter": "bmewburn.vscode-intelephense-client"
+  },
+
+  // Blade 模板格式化
+  "[blade]": {
+    "editor.defaultFormatter": "shufo.vscode-blade-formatter"
+  },
+
+  // 檔案關聯
+  "files.associations": {
+    "*.blade.php": "blade"
+  },
+
+  // 排除不需要搜尋的目錄
+  "search.exclude": {
+    "**/vendor": true,
+    "**/node_modules": true,
+    "**/storage/framework": true
+  }
+}
