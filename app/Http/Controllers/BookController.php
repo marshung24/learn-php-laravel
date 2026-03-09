@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreBookRequest;
+use App\Http\Requests\UpdateBookRequest;
 use App\Services\BookService;
-use Illuminate\Http\Request;
 
 /**
  * 書籍管理 MVC Controller（回傳 HTML 頁面）
  *
- * 使用 Service 層處理業務邏輯，Controller 只負責 HTTP 協議
+ * 使用 Form Request 驗證、Service 處理業務邏輯
  */
 class BookController extends Controller
 {
@@ -59,14 +60,12 @@ class BookController extends Controller
      *
      * PRG 模式：POST 後 redirect，避免使用者按 F5 重複提交
      *
-     * @param Request $request
+     * @param StoreBookRequest $request 驗證通過才會進入
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(Request $request)
+    public function store(StoreBookRequest $request)
     {
-        $this->bookService->create(
-            $request->only(['title', 'author', 'isbn', 'stock', 'publisher'])
-        );
+        $this->bookService->create($request->validated());
 
         return redirect()
             ->route('books.index')
@@ -89,17 +88,14 @@ class BookController extends Controller
     /**
      * 更新書籍
      *
-     * @param Request $request
+     * @param UpdateBookRequest $request 驗證通過才會進入
      * @param int $id
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(Request $request, int $id)
+    public function update(UpdateBookRequest $request, int $id)
     {
         $book = $this->bookService->findOrFail($id);
-        $this->bookService->update(
-            $book,
-            $request->only(['title', 'author', 'isbn', 'stock', 'publisher'])
-        );
+        $this->bookService->update($book, $request->validated());
 
         return redirect()
             ->route('books.show', $id)

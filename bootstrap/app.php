@@ -7,9 +7,11 @@
  * 一個檔案完成路由、中介層、例外處理的設定
  */
 
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -22,5 +24,12 @@ return Application::configure(basePath: dirname(__DIR__))
         // 中介層設定
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        // 例外處理設定
+        // API 請求的 ModelNotFoundException 回傳 404 JSON
+        $exceptions->render(function (ModelNotFoundException $e, Request $request) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'message' => 'Resource not found',
+                ], 404);
+            }
+        });
     })->create();

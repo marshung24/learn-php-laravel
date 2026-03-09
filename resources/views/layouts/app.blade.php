@@ -140,6 +140,16 @@
             </div>
         @endif
 
+        @if ($errors->any())
+            <div class="alert alert-danger" style="background: #fed7d7; color: #c53030;">
+                <ul style="margin: 0; padding-left: 1.5rem;">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         @yield('content')
     </div>
 </body>
