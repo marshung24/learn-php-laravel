@@ -1,0 +1,28 @@
+#!/usr/bin/env php
+<?php
+
+/**
+ * Laravel Artisan CLI 入口
+ *
+ * 這是 Laravel 的命令列工具，用來執行各種 artisan 指令：
+ * - php artisan serve      啟動開發伺服器
+ * - php artisan migrate    執行資料庫遷移
+ * - php artisan make:*     建立各種類別
+ */
+
+use Illuminate\Foundation\Application;
+use Symfony\Component\Console\Input\ArgvInput;
+
+define('LARAVEL_START', microtime(true));
+
+// 註冊 Composer autoloader
+require __DIR__.'/vendor/autoload.php';
+
+// 啟動 Laravel 應用程式
+/** @var Application $app */
+$app = require_once __DIR__.'/bootstrap/app.php';
+
+// 執行 Artisan 命令
+$status = $app->handleCommand(new ArgvInput);
+
+exit($status);
