@@ -26,6 +26,11 @@
         </div>
 
         <div class="form-group">
+            <label for="publisher">出版社</label>
+            <input type="text" id="publisher" name="publisher">
+        </div>
+
+        <div class="form-group">
             <label for="stock">庫存</label>
             <input type="number" id="stock" name="stock" value="0" min="0">
         </div>

@@ -3,24 +3,16 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Book;
 use Illuminate\Http\Request;
 
 /**
  * 書籍管理 REST API Controller（回傳 JSON）
  *
- * 使用假資料示範 RESTful API 的基本用法
+ * 使用 Eloquent ORM 串接資料庫
  */
 class BookApiController extends Controller
 {
-    /**
-     * 假資料：書籍清單
-     */
-    private array $books = [
-        ['id' => 1, 'title' => 'Laravel 入門', 'author' => '王大明', 'isbn' => '978-1234567890', 'stock' => 5],
-        ['id' => 2, 'title' => 'PHP 實戰', 'author' => '李小華', 'isbn' => '978-0987654321', 'stock' => 0],
-        ['id' => 3, 'title' => 'Redis 快取', 'author' => '張三', 'isbn' => '978-1122334455', 'stock' => 10],
-    ];
-
     /**
      * 取得所有書籍
      *
@@ -30,7 +22,7 @@ class BookApiController extends Controller
      */
     public function index()
     {
-        return response()->json($this->books);
+        return response()->json(Book::all());
     }
 
     /**
@@ -43,7 +35,7 @@ class BookApiController extends Controller
      */
     public function show(int $id)
     {
-        $book = collect($this->books)->firstWhere('id', $id);
+        $book = Book::find($id);
 
         if (!$book) {
             return response()->json([
@@ -55,7 +47,7 @@ class BookApiController extends Controller
     }
 
     /**
-     * 新增書籍（假實作）
+     * 新增書籍
      *
      * POST /api/books
      *
@@ -64,19 +56,13 @@ class BookApiController extends Controller
      */
     public function store(Request $request)
     {
-        // U06 會改用 Eloquent 真實儲存
-        // 目前先用假實作，展示 JSON 回應
-
-        $book = array_merge(
-            ['id' => 4],
-            $request->only(['title', 'author', 'isbn', 'stock'])
-        );
+        $book = Book::create($request->all());
 
         return response()->json($book, 201);
     }
 
     /**
-     * 更新書籍（假實作）
+     * 更新書籍
      *
      * PUT /api/books/{id}
      *
@@ -86,7 +72,7 @@ class BookApiController extends Controller
      */
     public function update(Request $request, int $id)
     {
-        $book = collect($this->books)->firstWhere('id', $id);
+        $book = Book::find($id);
 
         if (!$book) {
             return response()->json([
@@ -94,14 +80,13 @@ class BookApiController extends Controller
             ], 404);
         }
 
-        // U06 會改用 Eloquent 真實更新
-        $book = array_merge($book, $request->only(['title', 'author', 'isbn', 'stock']));
+        $book->update($request->all());
 
         return response()->json($book);
     }
 
     /**
-     * 刪除書籍（假實作）
+     * 刪除書籍
      *
      * DELETE /api/books/{id}
      *
@@ -110,15 +95,9 @@ class BookApiController extends Controller
      */
     public function destroy(int $id)
     {
-        $book = collect($this->books)->firstWhere('id', $id);
+        $book = Book::findOrFail($id);
+        $book->delete();
 
-        if (!$book) {
-            return response()->json([
-                'message' => 'Book not found',
-            ], 404);
-        }
-
-        // U06 會改用 Eloquent 真實刪除
         return response()->json(null, 204);
     }
 }

@@ -19,26 +19,35 @@
             <th>ISBN</th>
             <th>庫存</th>
             <th>狀態</th>
+            <th>操作</th>
         </tr>
     </thead>
     <tbody>
         @foreach ($books as $book)
         <tr>
-            <td>{{ $book['id'] }}</td>
+            <td>{{ $book->id }}</td>
             <td>
-                <a href="{{ route('books.show', $book['id']) }}">
-                    {{ $book['title'] }}
+                <a href="{{ route('books.show', $book->id) }}">
+                    {{ $book->title }}
                 </a>
             </td>
-            <td>{{ $book['author'] }}</td>
-            <td>{{ $book['isbn'] }}</td>
-            <td>{{ $book['stock'] }}</td>
+            <td>{{ $book->author }}</td>
+            <td>{{ $book->isbn }}</td>
+            <td>{{ $book->stock }}</td>
             <td>
-                @if ($book['stock'] > 0)
+                @if ($book->stock > 0)
                     <span class="text-success">有庫存</span>
                 @else
                     <span class="text-danger">缺貨</span>
                 @endif
+            </td>
+            <td>
+                <a href="{{ route('books.edit', $book->id) }}">編輯</a>
+                <form action="{{ route('books.destroy', $book->id) }}" method="POST" style="display: inline;">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" onclick="return confirm('確定要刪除嗎？')" style="background: none; border: none; color: #e53e3e; cursor: pointer;">刪除</button>
+                </form>
             </td>
         </tr>
         @endforeach
