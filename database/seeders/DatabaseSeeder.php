@@ -16,9 +16,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // 在這裡呼叫其他 Seeder
-        // $this->call([
-        //     BookSeeder::class,
-        // ]);
+        $this->call([
+            BookSeeder::class,
+        ]);
     }
 }
