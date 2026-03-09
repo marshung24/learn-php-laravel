@@ -3,26 +3,36 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Book;
+use App\Http\Resources\BookResource;
+use App\Services\BookService;
 use Illuminate\Http\Request;
 
 /**
  * 書籍管理 REST API Controller（回傳 JSON）
  *
- * 使用 Eloquent ORM 串接資料庫
+ * 使用 Service 層處理業務邏輯，Resource 處理輸出格式
  */
 class BookApiController extends Controller
 {
+    /**
+     * 建構子 - 依賴注入 BookService
+     */
+    public function __construct(
+        private BookService $bookService
+    ) {}
+
     /**
      * 取得所有書籍
      *
      * GET /api/books
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
     public function index()
     {
-        return response()->json(Book::all());
+        $books = $this->bookService->getAll();
+
+        return BookResource::collection($books);
     }
 
     /**
@@ -31,11 +41,11 @@ class BookApiController extends Controller
      * GET /api/books/{id}
      *
      * @param int $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return BookResource|\Illuminate\Http\JsonResponse
      */
     public function show(int $id)
     {
-        $book = Book::find($id);
+        $book = $this->bookService->find($id);
 
         if (!$book) {
             return response()->json([
@@ -43,7 +53,7 @@ class BookApiController extends Controller
             ], 404);
         }
 
-        return response()->json($book);
+        return new BookResource($book);
     }
 
     /**
@@ -52,13 +62,15 @@ class BookApiController extends Controller
      * POST /api/books
      *
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return BookResource
      */
     public function store(Request $request)
     {
-        $book = Book::create($request->all());
+        $book = $this->bookService->create($request->all());
 
-        return response()->json($book, 201);
+        return (new BookResource($book))
+            ->response()
+            ->setStatusCode(201);
     }
 
     /**
@@ -68,11 +80,11 @@ class BookApiController extends Controller
      *
      * @param Request $request
      * @param int $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return BookResource|\Illuminate\Http\JsonResponse
      */
     public function update(Request $request, int $id)
     {
-        $book = Book::find($id);
+        $book = $this->bookService->find($id);
 
         if (!$book) {
             return response()->json([
@@ -80,9 +92,9 @@ class BookApiController extends Controller
             ], 404);
         }
 
-        $book->update($request->all());
+        $book = $this->bookService->update($book, $request->all());
 
-        return response()->json($book);
+        return new BookResource($book);
     }
 
     /**
@@ -95,9 +107,9 @@ class BookApiController extends Controller
      */
     public function destroy(int $id)
     {
-        $book = Book::findOrFail($id);
-        $book->delete();
+        $book = $this->bookService->findOrFail($id);
+        $this->bookService->delete($book);
 
-        return response()->json(null, 204);
+        return response()->noContent();
     }
 }

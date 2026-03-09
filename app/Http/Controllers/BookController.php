@@ -2,16 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Book;
+use App\Services\BookService;
 use Illuminate\Http\Request;
 
 /**
  * 書籍管理 MVC Controller（回傳 HTML 頁面）
  *
- * 使用 Eloquent ORM 串接資料庫
+ * 使用 Service 層處理業務邏輯，Controller 只負責 HTTP 協議
  */
 class BookController extends Controller
 {
+    /**
+     * 建構子 - 依賴注入 BookService
+     */
+    public function __construct(
+        private BookService $bookService
+    ) {}
+
     /**
      * 書籍清單頁面
      *
@@ -19,7 +26,7 @@ class BookController extends Controller
      */
     public function index()
     {
-        $books = Book::all();
+        $books = $this->bookService->getAll();
 
         return view('books.index', compact('books'));
     }
@@ -32,7 +39,7 @@ class BookController extends Controller
      */
     public function show(int $id)
     {
-        $book = Book::findOrFail($id);
+        $book = $this->bookService->findOrFail($id);
 
         return view('books.show', compact('book'));
     }
@@ -50,12 +57,16 @@ class BookController extends Controller
     /**
      * 儲存新書籍
      *
+     * PRG 模式：POST 後 redirect，避免使用者按 F5 重複提交
+     *
      * @param Request $request
      * @return \Illuminate\Http\RedirectResponse
      */
     public function store(Request $request)
     {
-        Book::create($request->only(['title', 'author', 'isbn', 'stock', 'publisher']));
+        $this->bookService->create(
+            $request->only(['title', 'author', 'isbn', 'stock', 'publisher'])
+        );
 
         return redirect()
             ->route('books.index')
@@ -70,7 +81,7 @@ class BookController extends Controller
      */
     public function edit(int $id)
     {
-        $book = Book::findOrFail($id);
+        $book = $this->bookService->findOrFail($id);
 
         return view('books.edit', compact('book'));
     }
@@ -84,8 +95,11 @@ class BookController extends Controller
      */
     public function update(Request $request, int $id)
     {
-        $book = Book::findOrFail($id);
-        $book->update($request->only(['title', 'author', 'isbn', 'stock', 'publisher']));
+        $book = $this->bookService->findOrFail($id);
+        $this->bookService->update(
+            $book,
+            $request->only(['title', 'author', 'isbn', 'stock', 'publisher'])
+        );
 
         return redirect()
             ->route('books.show', $id)
@@ -100,8 +114,8 @@ class BookController extends Controller
      */
     public function destroy(int $id)
     {
-        $book = Book::findOrFail($id);
-        $book->delete();
+        $book = $this->bookService->findOrFail($id);
+        $this->bookService->delete($book);
 
         return redirect()
             ->route('books.index')
